@@ -7,7 +7,7 @@
     <link rel="icon" type="image/x-icon" href="icon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Doto:wght@100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-draw/dist/leaflet.draw.css" />
     <style>
@@ -16,7 +16,6 @@
             font-family: 'Roboto', sans-serif;
         }
 
-        /* Header Style */
         #header {
             position: fixed;
             top: 0;
@@ -26,66 +25,38 @@
             color: black;
             padding: 15px 20px;
             text-align: center;
-            font-size: 36px;
+            font-size: 24px;
             font-weight: bold;
-            z-index: 2000; /* Ensure header is in front of map */
+            z-index: 2000;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         #map {
-            height: calc(100vh - 80px); /* Space for header */
+            height: calc(100vh - 80px);
             width: 100%;
-            margin-top: 80px; /* Space for header */
+            margin-top: 80px;
         }
 
-        /* Menu Style */
         #menu {
             position: absolute;
-            top: 100px; /* Adjusted to avoid overlap with header */
+            top: 100px;
             right: 20px;
             background: white;
             padding: 15px;
             border: 1px solid #ccc;
-            z-index: 1000; /* Menu stays on top of map */
+            z-index: 1000;
             width: 270px;
-            max-width: 90vw;
-            transition: width 0.3s ease-in-out;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        #menu.collapsed {
-            width: 60px;
-        }
-
-        /* Collapsing Button */
-        #menu-toggle {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background-color: #f1f1f1;
-            padding: 6px;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            text-align: center;
-        }
-
-        #menu-toggle:hover {
-            background-color: #ddd;
-        }
-
-        #menu label, #menu input, #menu button {
+        #menu label, #menu input, #menu select, #menu textarea, #menu button {
             display: block;
             margin-bottom: 10px;
             width: 100%;
         }
 
         #menu input[type="color"] {
-            width: 100%;
             padding: 5px;
         }
 
@@ -104,7 +75,6 @@
             border: none;
             padding: 12px;
             cursor: pointer;
-            width: 100%;
             font-size: 16px;
             margin-top: 15px;
             border-radius: 5px;
@@ -118,26 +88,33 @@
             font-size: 12px;
             color: #777;
             text-align: center;
-            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <!-- Header Section -->
     <div id="header">Bacationary Street Panel</div>
-
-    <!-- Map -->
     <div id="map"></div>
-
-    <!-- Menu Section -->
     <div id="menu">
+        <label for="name">Territory Name:</label>
+        <input type="text" id="name" placeholder="Enter territory name">
+
+        <label for="description">Territory Description:</label>
+        <textarea id="description" rows="3" placeholder="Enter a brief description"></textarea>
+
         <label for="color">Change Parcel Color:</label>
-        <input type="color" id="color" value="#800080"><br> <!-- Default color: Purple -->
-        
+        <input type="color" id="color" value="#800080">
+
         <label for="logo">Upload Logo:</label>
-        <input type="file" id="logo"><br>
-        <img id="logo-preview" alt="Logo Preview"><br>
-        
+        <input type="file" id="logo">
+        <img id="logo-preview" alt="Logo Preview">
+
+        <label for="territory-type">Territory Type:</label>
+        <select id="territory-type">
+            <option value="neutral">Neutral</option>
+            <option value="rival">Rival</option>
+            <option value="allied">Allied</option>
+        </select>
+
         <button id="apply">Apply Changes</button>
         <button id="clear-btn">Clear Everything</button>
         <div id="clear-info">Refresh the page after clearing parcels to reset storage.</div>
@@ -147,32 +124,23 @@
     <script src="https://unpkg.com/leaflet-draw/dist/leaflet.draw.js"></script>
     <script>
         const map = L.map('map').setView([38.80158522652945, -77.30930326163133], 15);
-
-        const baseLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19
-        }).addTo(map);
-
-        const drawnItems = new L.FeatureGroup();
-        map.addLayer(drawnItems);
+        const baseLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+        const drawnItems = new L.FeatureGroup().addTo(map);
 
         const drawControl = new L.Control.Draw({
-            edit: {
-                featureGroup: drawnItems
-            },
+            edit: { featureGroup: drawnItems },
             draw: {
                 polygon: true,
-                polyline: true,
                 rectangle: false,
                 circle: false,
+                polyline: false,
                 marker: false
             }
-        });
-        map.addControl(drawControl);
+        }).addTo(map);
 
         let selectedLayer = null;
-
-        // Load saved data from localStorage
         const savedData = JSON.parse(localStorage.getItem('parcelData')) || [];
+
         savedData.forEach(item => {
             const layer = L.polygon(item.latlngs, { color: item.color }).addTo(drawnItems);
             layer.data = item;
@@ -190,14 +158,17 @@
             }
         });
 
-        map.on(L.Draw.Event.CREATED, function (event) {
+        map.on(L.Draw.Event.CREATED, event => {
             const layer = event.layer;
             drawnItems.addLayer(layer);
 
             layer.data = {
                 latlngs: layer.getLatLngs(),
-                color: '#800080',  // Default color: Purple
-                logo: null
+                color: '#800080',
+                logo: null,
+                type: 'neutral',
+                name: '',
+                description: ''
             };
 
             selectedLayer = layer;
@@ -205,46 +176,47 @@
             saveData();
         });
 
-        drawnItems.on('click', function (e) {
-            selectedLayer = e.layer;
+        drawnItems.on('click', event => {
+            selectedLayer = event.layer;
             openMenu();
         });
 
-        document.getElementById('apply').onclick = function () {
-            if (selectedLayer) {
-                applyChanges();
-            }
-        };
-
-        document.getElementById('clear-btn').onclick = function () {
-            clearAllData();
-        };
+        document.getElementById('apply').onclick = () => selectedLayer && applyChanges();
+        document.getElementById('clear-btn').onclick = () => clearAllData();
 
         function openMenu() {
-            // Update menu based on selectedLayer data
-            const colorInput = document.getElementById('color');
-            colorInput.value = selectedLayer.data.color;
-
+            const { color, logo, type, name, description } = selectedLayer.data;
+            document.getElementById('color').value = color;
+            document.getElementById('name').value = name || '';
+            document.getElementById('description').value = description || '';
             const logoPreview = document.getElementById('logo-preview');
-            if (selectedLayer.data.logo) {
-                logoPreview.src = selectedLayer.data.logo;
+            if (logo) {
+                logoPreview.src = logo;
                 logoPreview.style.display = 'block';
             } else {
                 logoPreview.style.display = 'none';
             }
+            document.getElementById('territory-type').value = type;
         }
 
         function applyChanges() {
-            const colorInput = document.getElementById('color');
-            selectedLayer.setStyle({ color: colorInput.value });
-            selectedLayer.data.color = colorInput.value;
+            const nameInput = document.getElementById('name').value;
+            const descriptionInput = document.getElementById('description').value;
+            const colorInput = document.getElementById('color').value;
+            const territoryType = document.getElementById('territory-type').value;
+
+            selectedLayer.setStyle({ color: colorInput });
+            selectedLayer.data.name = nameInput;
+            selectedLayer.data.description = descriptionInput;
+            selectedLayer.data.color = colorInput;
+            selectedLayer.data.type = territoryType;
 
             const logoInput = document.getElementById('logo');
             if (logoInput.files.length > 0) {
                 const reader = new FileReader();
-                reader.onload = function (event) {
-                    selectedLayer.data.logo = event.target.result;
-
+                reader.onload = event => {
+                    const logoURL = event.target.result;
+                    selectedLayer.data.logo = logoURL;
                     const center = selectedLayer.getBounds().getCenter();
                     if (selectedLayer.logoMarker) {
                         map.removeLayer(selectedLayer.logoMarker);
@@ -252,15 +224,13 @@
                     selectedLayer.logoMarker = L.marker(center, {
                         icon: L.divIcon({
                             className: 'custom-logo-icon',
-                            html: `<img src="${event.target.result}" style="width:50px;height:50px;">`,
+                            html: `<img src="${logoURL}" style="width:50px;height:50px;">`,
                             iconSize: [50, 50],
                             iconAnchor: [25, 25]
                         })
                     }).addTo(map);
-
-                    const logoPreview = document.getElementById('logo-preview');
-                    logoPreview.src = event.target.result;
-                    logoPreview.style.display = 'block';
+                    document.getElementById('logo-preview').src = logoURL;
+                    document.getElementById('logo-preview').style.display = 'block';
                 };
                 reader.readAsDataURL(logoInput.files[0]);
             }
@@ -272,30 +242,17 @@
             const data = [];
             drawnItems.eachLayer(layer => {
                 if (layer.data) {
-                    data.push({
-                        latlngs: layer.data.latlngs,
-                        color: layer.data.color,
-                        logo: layer.data.logo
-                    });
+                    data.push(layer.data);
                 }
             });
             localStorage.setItem('parcelData', JSON.stringify(data));
         }
 
         function clearAllData() {
-            // Clear the map and localStorage
             drawnItems.clearLayers();
             localStorage.removeItem('parcelData');
             document.getElementById('logo-preview').style.display = 'none';
         }
-
-        // Toggle Menu Collapse
-        const menu = document.getElementById('menu');
-        const toggleButton = document.getElementById('menu-toggle');
-        toggleButton.addEventListener('click', function() {
-            menu.classList.toggle('collapsed');
-            toggleButton.textContent = menu.classList.contains('collapsed') ? '+' : '-';
-        });
     </script>
 </body>
 </html>
