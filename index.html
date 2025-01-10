@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="icon.png">
+    <title>Home | Schoology</title>
+    <style>
+        /* Basic reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Full-screen background */
+        body {
+            height: 100vh;
+            background-image: url('menuicon.jpg'); /* Set the background image */
+            background-size: cover; /* Make the image cover the entire screen */
+            background-position: center; /* Center the image */
+            background-attachment: fixed; /* Keep the background fixed while scrolling */
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+
+        /* Container for the menu */
+        .menu-container {
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent black background */
+            padding: 40px 60px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+        }
+
+        /* Title styling */
+        .title {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        /* Tagline styling */
+        .tagline {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        /* Copyright notice */
+        .copyright {
+            font-size: 0.9rem;
+            margin-top: 30px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Button Styling */
+        .goto-button {
+            background-color: #ffffff;
+            color: rgb(0, 0, 0);
+            border: none;
+            padding: 12px 24px;
+            font-size: 1.2rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        /* Button hover effects */
+        .goto-button:hover {
+            background-color: #FF2E00;
+            transform: scale(1.1);
+        }
+
+        /* Button active effect */
+        .goto-button:active {
+            transform: scale(1);
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-container fade-in">
+        <div class="title">Bacation Street Panel</div>
+        <div class="tagline">Bacationaries, or f*ck being stationary.</div>
+        <button class="goto-button" onclick="window.location.href='main.html'">Go To Map</button>
+        <div class="copyright">&copy; 2025 Bacationary Gangs. All Rights Reserved.</div>
+    </div>
+</body>
+</html>
