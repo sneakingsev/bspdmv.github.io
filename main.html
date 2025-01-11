@@ -3,256 +3,281 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In</title>
+    <title>Schoology | Home</title>
     <link rel="icon" type="image/x-icon" href="icon.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-draw/dist/leaflet.draw.css" />
     <style>
         body {
             margin: 0;
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: #eef2f5;
         }
 
-        #header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background-color: white;
-            color: black;
-            padding: 15px 20px;
+        header {
+            background: #4e2a84;
+            color: white;
+            padding: 20px;
+            font-size: 32px;
+            font-weight: 800;
             text-align: center;
-            font-size: 38px;
-            font-weight: bold;
-            z-index: 2000;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        #map {
-            height: calc(100vh - 80px);
-            width: 100%;
-            margin-top: 80px;
+        main {
+            display: flex;
+            flex: 1;
         }
 
         #menu {
-            position: absolute;
-            top: 100px;
-            right: 20px;
+            width: 320px;
             background: white;
-            padding: 15px;
-            border: 1px solid #ccc;
-            z-index: 1000;
-            width: 270px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-right: 1px solid #ddd;
+            padding: 25px;
+            box-shadow: 4px 0 6px rgba(0, 0, 0, 0.05);
+            overflow-y: auto;
         }
 
-        #menu label, #menu input, #menu select, #menu textarea, #menu button {
-            display: block;
+        #menu h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #4e2a84;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        #menu label {
+            font-weight: 600;
             margin-bottom: 10px;
+            display: block;
+            color: #555;
+        }
+
+        #menu input, #menu select, #menu button {
             width: 100%;
+            margin-bottom: 20px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: all 0.2s ease-in-out;
         }
 
         #menu input[type="color"] {
-            padding: 5px;
+            padding: 0;
+            height: 45px;
+        }
+
+        #menu button {
+            background: #4e2a84;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        #menu button:hover {
+            background: #3b1e61;
+        }
+
+        #map {
+            flex: 1;
+            height: 100%;
         }
 
         #logo-preview {
+            display: none;
+            margin: 10px 0;
             width: 100px;
             height: 100px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            object-fit: contain;
-            display: none;
+            object-fit: cover;
+            border: 1px solid #ddd;
+            border-radius: 6px;
         }
 
-        #clear-btn {
-            background-color: #ff4d4d;
-            color: white;
-            border: none;
-            padding: 12px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-top: 15px;
-            border-radius: 5px;
-        }
-
-        #clear-btn:hover {
-            background-color: #ff1a1a;
-        }
-
-        #clear-info {
-            font-size: 12px;
-            color: #777;
+        #note {
+            font-size: 14px;
+            color: #888;
+            margin-top: 20px;
             text-align: center;
+        }
+
+        .popup-content {
+            color: #333;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+
+        .popup-content img {
+            max-width: 50px;
+            height: auto;
+            margin-right: 10px;
+        }
+
+        .popup-content .details div {
+            margin-right: 10px;
         }
     </style>
 </head>
 <body>
-    <div id="header">Bacationary Street Panel</div>
-    <div id="map"></div>
-    <div id="menu">
-        <label for="name">Territory Name:</label>
-        <input type="text" id="name" placeholder="Enter territory name">
-
-        <label for="description">Territory Description:</label>
-        <textarea id="description" rows="3" placeholder="Enter a brief description"></textarea>
-
-        <label for="color">Change Parcel Color:</label>
-        <input type="color" id="color" value="#800080">
-
-        <label for="logo">Upload Logo:</label>
-        <input type="file" id="logo">
-        <img id="logo-preview" alt="Logo Preview">
-
-        <label for="territory-type">Territory Type:</label>
-        <select id="territory-type">
-            <option value="neutral">Neutral</option>
-            <option value="rival">Rival</option>
-            <option value="allied">Allied</option>
-        </select>
-
-        <button id="apply">Apply Changes</button>
-        <button id="clear-btn">Clear Everything</button>
-        <div id="clear-info">Refresh the page after clearing parcels to reset storage.</div>
-    </div>
-
+    <header>Bacationary Parcel Manager</header>
+    <main>
+        <div id="menu">
+            <h2>Create New Turf</h2>
+            <label for="parcel-name">Group Name</label>
+            <input type="text" id="parcel-name" placeholder="Enter parcel group name">
+            
+            <label for="parcel-color">Select Turf Color</label>
+            <input type="color" id="parcel-color" value="#000000">
+            
+            <label for="parcel-status">Turf Status</label>
+            <select id="parcel-status">
+                <option value="neutral">Neutral</option>
+                <option value="rival">Rival</option>
+                <option value="allied">Allied</option>
+            </select>
+            
+            <label for="parcel-logo">Upload Logo</label>
+            <input type="file" id="parcel-logo">
+            <img id="logo-preview" alt="Logo Preview">
+            
+            <button id="start-drawing">Start Drawing</button>
+            <button id="clear-all">Clear All Turfs</button>
+            
+            <div id="note">
+                <p><strong>Note:</strong> You must refresh the page for clearing to work properly.</p>
+            </div>
+        </div>
+        
+        <div id="map"></div>
+    </main>
+    
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-draw/dist/leaflet.draw.js"></script>
     <script>
-        const map = L.map('map').setView([38.80158522652945, -77.30930326163133], 15);
+        const map = L.map('map').setView([38.810648463501316, -77.30916683664891], 15);
         const baseLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
         const drawnItems = new L.FeatureGroup().addTo(map);
 
-        const drawControl = new L.Control.Draw({
-            edit: { featureGroup: drawnItems },
-            draw: {
-                polygon: true,
-                rectangle: false,
-                circle: false,
-                polyline: false,
-                marker: false
-            }
-        }).addTo(map);
+        let parcels = JSON.parse(localStorage.getItem('parcels')) || [];
+        let parcelDetails = {};
 
-        let selectedLayer = null;
-        const savedData = JSON.parse(localStorage.getItem('parcelData')) || [];
-
-        savedData.forEach(item => {
-            const layer = L.polygon(item.latlngs, { color: item.color }).addTo(drawnItems);
-            layer.data = item;
-
-            if (item.logo) {
-                const center = layer.getBounds().getCenter();
-                layer.logoMarker = L.marker(center, {
-                    icon: L.divIcon({
-                        className: 'custom-logo-icon',
-                        html: `<img src="${item.logo}" style="width:50px;height:50px;">`,
-                        iconSize: [50, 50],
-                        iconAnchor: [25, 25]
-                    })
-                }).addTo(map);
-            }
-        });
-
-        map.on(L.Draw.Event.CREATED, event => {
-            const layer = event.layer;
-            drawnItems.addLayer(layer);
-
-            layer.data = {
-                latlngs: layer.getLatLngs(),
-                color: '#800080',
-                logo: null,
-                type: 'neutral',
-                name: '',
-                description: ''
-            };
-
-            selectedLayer = layer;
-            openMenu();
-            saveData();
-        });
-
-        drawnItems.on('click', event => {
-            selectedLayer = event.layer;
-            openMenu();
-        });
-
-        document.getElementById('apply').onclick = () => selectedLayer && applyChanges();
-        document.getElementById('clear-btn').onclick = () => clearAllData();
-
-        function openMenu() {
-            const { color, logo, type, name, description } = selectedLayer.data;
-            document.getElementById('color').value = color;
-            document.getElementById('name').value = name || '';
-            document.getElementById('description').value = description || '';
-            const logoPreview = document.getElementById('logo-preview');
-            if (logo) {
-                logoPreview.src = logo;
-                logoPreview.style.display = 'block';
-            } else {
-                logoPreview.style.display = 'none';
-            }
-            document.getElementById('territory-type').value = type;
+        // Function to calculate acreage in acres
+        function calculateAcreage(latlngs) {
+            const areaInMeters = L.GeometryUtil.geodesicArea(latlngs);
+            const areaInAcres = areaInMeters / 4046.86; // Convert from square meters to acres
+            return areaInAcres.toFixed(2); // Limit to 2 decimal places
         }
 
-        function applyChanges() {
-            const nameInput = document.getElementById('name').value;
-            const descriptionInput = document.getElementById('description').value;
-            const colorInput = document.getElementById('color').value;
-            const territoryType = document.getElementById('territory-type').value;
+        // Function to load existing turfs from local storage
+        function loadParcels() {
+            parcels.forEach(parcel => {
+                const layer = L.polygon(parcel.latlngs, { color: parcel.color }).addTo(drawnItems);
+                const acreage = calculateAcreage(parcel.latlngs);
 
-            selectedLayer.setStyle({ color: colorInput });
-            selectedLayer.data.name = nameInput;
-            selectedLayer.data.description = descriptionInput;
-            selectedLayer.data.color = colorInput;
-            selectedLayer.data.type = territoryType;
+                let popupContent = `
+                    <div class="popup-content">
+                        <img src="${parcel.logo || ''}" alt="Logo">
+                        <div>
+                            <strong>Group Name:</strong> ${parcel.name}<br>
+                            <strong>Acreage:</strong> ${acreage} acres
+                        </div>
+                    </div>
+                `;
+                layer.bindPopup(popupContent);
 
-            const logoInput = document.getElementById('logo');
-            if (logoInput.files.length > 0) {
-                const reader = new FileReader();
-                reader.onload = event => {
-                    const logoURL = event.target.result;
-                    selectedLayer.data.logo = logoURL;
-                    const center = selectedLayer.getBounds().getCenter();
-                    if (selectedLayer.logoMarker) {
-                        map.removeLayer(selectedLayer.logoMarker);
-                    }
-                    selectedLayer.logoMarker = L.marker(center, {
+                if (parcel.logo) {
+                    const center = layer.getBounds().getCenter();
+                    L.marker(center, {
                         icon: L.divIcon({
-                            className: 'custom-logo-icon',
-                            html: `<img src="${logoURL}" style="width:50px;height:50px;">`,
-                            iconSize: [50, 50],
-                            iconAnchor: [25, 25]
+                            html: `<img src="${parcel.logo}" style="width:50px;height:50px;">`,
+                            iconSize: [50, 50]
                         })
                     }).addTo(map);
-                    document.getElementById('logo-preview').src = logoURL;
-                    document.getElementById('logo-preview').style.display = 'block';
-                };
-                reader.readAsDataURL(logoInput.files[0]);
-            }
-
-            saveData();
-        }
-
-        function saveData() {
-            const data = [];
-            drawnItems.eachLayer(layer => {
-                if (layer.data) {
-                    data.push(layer.data);
                 }
             });
-            localStorage.setItem('parcelData', JSON.stringify(data));
         }
 
-        function clearAllData() {
+        // Logo file input event listener
+        const logoInput = document.getElementById('parcel-logo');
+        logoInput.addEventListener('change', event => {
+            const reader = new FileReader();
+            reader.onload = () => {
+                document.getElementById('logo-preview').src = reader.result;
+                document.getElementById('logo-preview').style.display = 'block';
+                parcelDetails.logo = reader.result;
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        });
+
+        // Start drawing turf polygon
+        document.getElementById('start-drawing').addEventListener('click', () => {
+            parcelDetails = {
+                name: document.getElementById('parcel-name').value,
+                color: document.getElementById('parcel-color').value,
+                status: document.getElementById('parcel-status').value,
+                logo: parcelDetails.logo || null
+            };
+
+            const drawControl = new L.Control.Draw({
+                edit: { featureGroup: drawnItems },
+                draw: { polygon: true }
+            }).addTo(map);
+
+            map.on(L.Draw.Event.CREATED, event => {
+                const layer = event.layer;
+                layer.setStyle({ color: parcelDetails.color });
+                layer.data = { ...parcelDetails, latlngs: layer.getLatLngs() };
+                drawnItems.addLayer(layer);
+
+                const acreage = calculateAcreage(layer.getLatLngs());
+                let popupContent = `
+                    <div class="popup-content">
+                        <img src="${parcelDetails.logo || ''}" alt="Logo">
+                        <div>
+                            <strong>Group Name:</strong> ${parcelDetails.name}<br>
+                            <strong>Acreage:</strong> ${acreage} acres
+                        </div>
+                    </div>
+                `;
+                layer.bindPopup(popupContent);
+
+                if (parcelDetails.logo) {
+                    const center = layer.getBounds().getCenter();
+                    L.marker(center, {
+                        icon: L.divIcon({
+                            html: `<img src="${parcelDetails.logo}" style="width:50px;height:50px;">`,
+                            iconSize: [50, 50]
+                        })
+                    }).addTo(map);
+                }
+
+                parcels.push(layer.data);
+                saveParcels();
+            });
+        });
+
+        // Clear all turfs from the map
+        document.getElementById('clear-all').addEventListener('click', () => {
             drawnItems.clearLayers();
-            localStorage.removeItem('parcelData');
-            document.getElementById('logo-preview').style.display = 'none';
+            parcels = [];
+            saveParcels();
+        });
+
+        // Save parcels to localStorage
+        function saveParcels() {
+            localStorage.setItem('parcels', JSON.stringify(parcels));
         }
+
+        // Load existing turfs from localStorage
+        loadParcels();
     </script>
 </body>
 </html>
