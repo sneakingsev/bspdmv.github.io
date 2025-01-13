@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Schoology | Home</title>
+    <title>Bacation Street Panel</title>
     <link rel="icon" type="image/x-icon" href="icon.png">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-draw/dist/leaflet.draw.css" />
     <style>
         body {
             margin: 0;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Roboto', sans-serif;
             display: flex;
             flex-direction: column;
             height: 100vh;
@@ -24,7 +24,7 @@
             padding: 20px;
             font-size: 32px;
             font-weight: 800;
-            text-align: center;
+            text-align: left;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
@@ -127,7 +127,7 @@
     </style>
 </head>
 <body>
-    <header>Bacationary Parcel Manager</header>
+    <header>lbad</header>
     <main>
         <div id="menu">
             <h2>Create New Turf</h2>
@@ -150,6 +150,9 @@
             
             <button id="start-drawing">Start Drawing</button>
             <button id="clear-all">Clear All Turfs</button>
+            <button id="export-data">Export Data</button>
+            <input type="file" id="import-data" style="display: none;">
+            <button id="import-button">Import Data</button>
             
             <div id="note">
                 <p><strong>Note:</strong> You must refresh the page for clearing to work properly.</p>
@@ -169,14 +172,12 @@
         let parcels = JSON.parse(localStorage.getItem('parcels')) || [];
         let parcelDetails = {};
 
-        // Function to calculate acreage in acres
         function calculateAcreage(latlngs) {
             const areaInMeters = L.GeometryUtil.geodesicArea(latlngs);
-            const areaInAcres = areaInMeters / 4046.86; // Convert from square meters to acres
-            return areaInAcres.toFixed(2); // Limit to 2 decimal places
+            const areaInAcres = areaInMeters / 4046.86;
+            return areaInAcres.toFixed(2);
         }
 
-        // Function to load existing turfs from local storage
         function loadParcels() {
             parcels.forEach(parcel => {
                 const layer = L.polygon(parcel.latlngs, { color: parcel.color }).addTo(drawnItems);
@@ -184,7 +185,7 @@
 
                 let popupContent = `
                     <div class="popup-content">
-                        <img src="${parcel.logo || ''}" alt="Logo">
+                        <img src="${parcel.logo}" alt="Logo" style="max-width:50px;height:auto;">
                         <div>
                             <strong>Group Name:</strong> ${parcel.name}<br>
                             <strong>Acreage:</strong> ${acreage} acres
@@ -205,7 +206,6 @@
             });
         }
 
-        // Logo file input event listener
         const logoInput = document.getElementById('parcel-logo');
         logoInput.addEventListener('change', event => {
             const reader = new FileReader();
@@ -217,7 +217,6 @@
             reader.readAsDataURL(event.target.files[0]);
         });
 
-        // Start drawing turf polygon
         document.getElementById('start-drawing').addEventListener('click', () => {
             parcelDetails = {
                 name: document.getElementById('parcel-name').value,
@@ -240,7 +239,7 @@
                 const acreage = calculateAcreage(layer.getLatLngs());
                 let popupContent = `
                     <div class="popup-content">
-                        <img src="${parcelDetails.logo || ''}" alt="Logo">
+                        <img src="${parcelDetails.logo}" alt="Logo" style="max-width:50px;height:auto;">
                         <div>
                             <strong>Group Name:</strong> ${parcelDetails.name}<br>
                             <strong>Acreage:</strong> ${acreage} acres
@@ -249,34 +248,51 @@
                 `;
                 layer.bindPopup(popupContent);
 
-                if (parcelDetails.logo) {
-                    const center = layer.getBounds().getCenter();
-                    L.marker(center, {
-                        icon: L.divIcon({
-                            html: `<img src="${parcelDetails.logo}" style="width:50px;height:50px;">`,
-                            iconSize: [50, 50]
-                        })
-                    }).addTo(map);
-                }
-
                 parcels.push(layer.data);
                 saveParcels();
             });
         });
 
-        // Clear all turfs from the map
         document.getElementById('clear-all').addEventListener('click', () => {
             drawnItems.clearLayers();
             parcels = [];
             saveParcels();
         });
 
-        // Save parcels to localStorage
         function saveParcels() {
             localStorage.setItem('parcels', JSON.stringify(parcels));
         }
 
-        // Load existing turfs from localStorage
+        document.getElementById('export-data').addEventListener('click', () => {
+            const dataStr = JSON.stringify(parcels);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "parcels.json";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        });
+
+        document.getElementById('import-button').addEventListener('click', () => {
+            document.getElementById('import-data').click();
+        });
+
+        document.getElementById('import-data').addEventListener('change', event => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    parcels = JSON.parse(reader.result);
+                    drawnItems.clearLayers();
+                    loadParcels();
+                    saveParcels();
+                };
+                reader.readAsText(file);
+            }
+        });
+
         loadParcels();
     </script>
 </body>
