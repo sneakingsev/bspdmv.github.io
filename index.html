@@ -3,297 +3,921 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bacation Street Panel</title>
+    <title>The Station</title>
     <link rel="icon" type="image/x-icon" href="icon.png">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet-draw/dist/leaflet.draw.css" />
     <style>
+        :root {
+            --color-primary: #2563EB;
+            --color-primary-hover: #1D4ED8;
+            --color-secondary: #3F3F46;
+            --color-secondary-hover: #52525B;
+            --color-danger: #DC2626;
+            --color-danger-hover: #B91C1C;
+            --color-success: #16A34A;
+            --color-success-hover: #15803D;
+            --color-background: #FAFAFA;
+            --color-surface: #FFFFFF;
+            --color-surface-2: #F4F4F5;
+            --color-text: #18181B;
+            --color-text-secondary: #71717A;
+            --color-border: #E4E4E7;
+            --color-border-hover: #D4D4D8;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius-sm: 4px;
+            --radius-md: 6px;
+            --radius-lg: 8px;
+            --radius-xl: 12px;
+            --transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
             margin: 0;
-            font-family: 'Roboto', sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             display: flex;
             flex-direction: column;
             height: 100vh;
-            background: #eef2f5;
+            background: var(--color-background);
+            color: var(--color-text);
+            overflow: hidden;
         }
 
         header {
-            background: #4e2a84;
+            background: var(--color-surface);
+            color: var(--color-text);
+            padding: 0 20px;
+            height: 60px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 100;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--color-primary);
             color: white;
-            padding: 20px;
-            font-size: 32px;
-            font-weight: 800;
-            text-align: left;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-weight: 700;
+            font-size: 16px;
+            border-radius: var(--radius-md);
+        }
+
+        .logo-text {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
         }
 
         main {
             display: flex;
             flex: 1;
+            overflow: hidden;
+            position: relative;
         }
 
-        #menu {
-            width: 320px;
-            background: white;
-            border-right: 1px solid #ddd;
-            padding: 25px;
-            box-shadow: 4px 0 6px rgba(0, 0, 0, 0.05);
-            overflow-y: auto;
-        }
-
-        #menu h2 {
-            font-size: 24px;
-            margin-bottom: 20px;
-            color: #4e2a84;
-            text-align: center;
-            font-weight: 600;
-        }
-
-        #menu label {
-            font-weight: 600;
-            margin-bottom: 10px;
-            display: block;
-            color: #555;
-        }
-
-        #menu input, #menu select, #menu button {
-            width: 100%;
-            margin-bottom: 20px;
-            padding: 12px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 14px;
-            box-sizing: border-box;
-            transition: all 0.2s ease-in-out;
-        }
-
-        #menu input[type="color"] {
-            padding: 0;
-            height: 45px;
-        }
-
-        #menu button {
-            background: #4e2a84;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.3s ease;
-        }
-
-        #menu button:hover {
-            background: #3b1e61;
+        #map-container {
+            position: relative;
+            flex: 1;
         }
 
         #map {
-            flex: 1;
             height: 100%;
+            width: 100%;
+        }
+
+        #menu {
+            background: var(--color-surface);
+            border-left: 1px solid var(--color-border);
+            width: 340px;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.3s ease;
+        }
+
+        .menu-section {
+            margin-bottom: 24px;
+        }
+
+        .menu-section h2 {
+            font-size: 14px;
+            margin-bottom: 16px;
+            color: var(--color-text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: block;
+            color: var(--color-text-secondary);
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: var(--transition);
+            background: var(--color-surface);
+            color: var(--color-text);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-control[type="color"] {
+            padding: 0;
+            height: 44px;
+            width: 100%;
+            cursor: pointer;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border-radius: var(--radius-md);
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--color-primary-hover);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: var(--color-surface);
+            color: var(--color-text);
+            border: 1px solid var(--color-border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--color-surface-2);
+            border-color: var(--color-border-hover);
+        }
+
+        .btn-danger {
+            background: var(--color-danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: var(--color-danger-hover);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-success {
+            background: var(--color-success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: var(--color-success-hover);
+            box-shadow: var(--shadow-md);
         }
 
         #logo-preview {
             display: none;
-            margin: 10px 0;
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            border: 1px solid #ddd;
-            border-radius: 6px;
+            margin: 12px 0;
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
+            border-radius: var(--radius-md);
+            border: 1px dashed var(--color-border);
         }
 
-        #note {
-            font-size: 14px;
-            color: #888;
-            margin-top: 20px;
-            text-align: center;
+        .note {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-top: auto;
+            line-height: 1.5;
+            padding-top: 16px;
         }
 
         .popup-content {
-            color: #333;
+            color: var(--color-text);
             font-size: 14px;
             display: flex;
             align-items: center;
+            gap: 12px;
+            font-family: 'Inter', sans-serif;
         }
 
         .popup-content img {
-            max-width: 50px;
-            height: auto;
-            margin-right: 10px;
+            width: 44px;
+            height: 44px;
+            object-fit: contain;
+            border-radius: var(--radius-md);
         }
 
-        .popup-content .details div {
-            margin-right: 10px;
+        .popup-content .details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .popup-content .details strong {
+            font-weight: 600;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: var(--radius-full);
+            font-size: 12px;
+            font-weight: 500;
+            margin-top: 4px;
+        }
+
+        .status-neutral {
+            background-color: var(--color-surface-2);
+            color: var(--color-text-secondary);
+        }
+
+        .status-rival {
+            background-color: #FEE2E2;
+            color: var(--color-danger);
+        }
+
+        .status-allied {
+            background-color: #DCFCE7;
+            color: var(--color-success);
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 14px;
+            background: var(--color-surface);
+            border: 1px dashed var(--color-border);
+            border-radius: var(--radius-md);
+            color: var(--color-text-secondary);
+            font-size: 14px;
+            transition: var(--transition);
+            gap: 8px;
+        }
+
+        .file-input-label:hover {
+            background: var(--color-surface-2);
+            border-color: var(--color-primary);
+        }
+
+        /* Layer control styles */
+        .leaflet-control-layers {
+            border-radius: var(--radius-md) !important;
+            overflow: hidden;
+            box-shadow: var(--shadow-md) !important;
+            border: 1px solid var(--color-border) !important;
+        }
+
+        .leaflet-control-layers-toggle {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2371717A"><path d="M12 4l-8 8h16l-8-8zm0 16l8-8H4l8 8z"/></svg>') !important;
+            background-size: 18px !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+            width: 36px !important;
+            height: 36px !important;
+            background-color: var(--color-surface) !important;
+            border: 1px solid var(--color-border) !important;
+        }
+
+        .leaflet-control-layers-expanded {
+            padding: 12px !important;
+            background: var(--color-surface) !important;
+            border: 1px solid var(--color-border) !important;
+            width: 220px !important;
+        }
+
+        .leaflet-control-layers label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px !important;
+            margin: 0 !important;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif !important;
+            font-size: 14px !important;
+        }
+
+        .leaflet-control-layers label:hover {
+            background-color: var(--color-surface-2) !important;
+        }
+
+        .leaflet-control-layers input {
+            margin: 0 !important;
+            accent-color: var(--color-primary);
+        }
+
+        /* Zoom controls */
+        .leaflet-control-zoom {
+            border-radius: var(--radius-md) !important;
+            overflow: hidden;
+            box-shadow: var(--shadow-md) !important;
+            border: 1px solid var(--color-border) !important;
+        }
+
+        .leaflet-control-zoom-in, .leaflet-control-zoom-out {
+            background-color: var(--color-surface) !important;
+            border: none !important;
+            color: var(--color-text-secondary) !important;
+            font-family: 'Inter', sans-serif !important;
+            width: 36px !important;
+            height: 36px !important;
+            line-height: 36px !important;
+            font-size: 18px !important;
+            transition: var(--transition);
+        }
+
+        .leaflet-control-zoom-in:hover, .leaflet-control-zoom-out:hover {
+            background-color: var(--color-surface-2) !important;
+            color: var(--color-primary) !important;
+        }
+
+        /* Toggle button for mobile */
+        #menu-toggle {
+            display: none;
+            position: absolute;
+            right: 20px;
+            bottom: 20px;
+            z-index: 1000;
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-md);
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            box-shadow: var(--shadow-md);
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: var(--transition);
+        }
+
+        #menu-toggle:hover {
+            background: var(--color-primary-hover);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Snackbar styles */
+        .snackbar {
+            position: fixed;
+            left: 50%;
+            bottom: 24px;
+            transform: translateX(-50%);
+            background: var(--color-secondary);
+            color: white;
+            padding: 12px 20px;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            z-index: 10000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .snackbar.show {
+            opacity: 1;
+        }
+
+        .snackbar-action {
+            color: var(--color-primary);
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 12px;
+        }
+
+        @media (max-width: 768px) {
+            #menu {
+                position: absolute;
+                right: 0;
+                top: 0;
+                bottom: 0;
+                transform: translateX(100%);
+                width: 300px;
+                border-left: 1px solid var(--color-border);
+            }
+            
+            #menu.visible {
+                transform: translateX(0);
+            }
+            
+            #menu-toggle {
+                display: flex;
+            }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--color-surface-2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--color-border-hover);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--color-text-secondary);
         }
     </style>
 </head>
 <body>
-    <header>lbad</header>
-    <main>
-        <div id="menu">
-            <h2>Create New Parcel</h2>
-            <label for="parcel-name">Group Name</label>
-            <input type="text" id="parcel-name" placeholder="Enter parcel group name">
-            
-            <label for="parcel-color">Select Parcel Color</label>
-            <input type="color" id="parcel-color" value="#000000">
-            
-            <label for="parcel-status">Parcel Status</label>
-            <select id="parcel-status">
-                <option value="neutral">Neutral</option>
-                <option value="rival">Rival</option>
-                <option value="allied">Allied</option>
-            </select>
-            
-            <label for="parcel-logo">Upload Logo</label>
-            <input type="file" id="parcel-logo">
-            <img id="logo-preview" alt="Logo Preview">
-            
-            <button id="start-drawing">Start Drawing</button>
-            <button id="clear-all">Clear All Parcels</button>
-            <button id="export-data">Export Data</button>
+    <header>
+        <div class="logo">
+            <div class="logo-icon">S</div>
+            <span class="logo-text">The Station</span>
+        </div>
+        <div class="header-actions">
+            <button id="export-data" class="btn btn-secondary">
+                Export
+            </button>
+            <button id="import-button" class="btn btn-secondary">
+                Import
+            </button>
             <input type="file" id="import-data" style="display: none;">
-            <button id="import-button">Import Data</button>
-            
-            <div id="note">
-                <p><strong>Note:</strong> You must refresh the page for clearing to work properly.</p>
-            </div>
+        </div>
+    </header>
+    
+    <main>
+        <div id="map-container">
+            <div id="map"></div>
         </div>
         
-        <div id="map"></div>
+        <div id="menu">
+            <div class="menu-section">
+                <h2>Territory Details</h2>
+                
+                <div class="form-group">
+                    <label for="parcel-name">Gang Name</label>
+                    <input type="text" id="parcel-name" class="form-control" placeholder="Enter gang name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="parcel-color">Territory Color</label>
+                    <input type="color" id="parcel-color" class="form-control" value="#2563EB">
+                </div>
+                
+                <div class="form-group">
+                    <label for="parcel-status">Territory Status</label>
+                    <select id="parcel-status" class="form-control">
+                        <option value="neutral">Neutral</option>
+                        <option value="rival">Rival</option>
+                        <option value="allied">Allied</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="parcel-logo">Upload Logo</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="parcel-logo" accept="image/*">
+                        <label for="parcel-logo" class="file-input-label">
+                            Choose image
+                        </label>
+                    </div>
+                    <img id="logo-preview" alt="Logo Preview">
+                </div>
+            </div>
+            
+            <div class="menu-section">
+                <h2>Actions</h2>
+                <div class="button-group">
+                    <button id="start-drawing" class="btn btn-primary">
+                        Start Drawing
+                    </button>
+                    <button id="clear-all" class="btn btn-danger">
+                        Clear All
+                    </button>
+                </div>
+            </div>
+            
+            <div class="note">
+                <p><strong>Note:</strong> Click on the map to create vertices. Double-click to complete the shape.</p>
+                <p>All data is saved automatically in your browser.</p>
+            </div>
+        </div>
+
+        <button id="menu-toggle">≡</button>
     </main>
+
+    <div id="snackbar" class="snackbar"></div>
     
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-draw/dist/leaflet.draw.js"></script>
     <script>
-        const map = L.map('map').setView([38.810648463501316, -77.30916683664891], 15);
-        const baseLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
-        const drawnItems = new L.FeatureGroup().addTo(map);
+        // Optimized initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize the map with better performance settings
+            const map = L.map('map', {
+                preferCanvas: true, // Better performance for drawn items
+                zoomControl: false  // We'll add our own later
+            }).setView([38.810648463501316, -77.30916683664891], 15);
+            
+            // Define our base layers with better tile loading
+            const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                detectRetina: true
+            });
+            
+            const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                maxZoom: 19,
+                attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+                detectRetina: true
+            });
+            
+            // Add the default layer
+            osmLayer.addTo(map);
+            
+            // Add optimized layer control
+            const baseLayers = {
+                "Street Map": osmLayer,
+                "Satellite": satelliteLayer,
+            };
+            
+            L.control.layers(baseLayers, null, {
+                position: 'bottomright',
+                collapsed: false
+            }).addTo(map);
+            
+            // Initialize feature group for drawn items with performance optimization
+            const drawnItems = new L.FeatureGroup().addTo(map);
+            
+            // Debounce function for performance
+            function debounce(func, wait) {
+                let timeout;
+                return function() {
+                    const context = this, args = arguments;
+                    clearTimeout(timeout);
+                    timeout = setTimeout(() => {
+                        func.apply(context, args);
+                    }, wait);
+                };
+            }
+            
+            // Load saved parcels from localStorage with error handling
+            let parcels = [];
+            try {
+                const storedParcels = localStorage.getItem('parcels');
+                parcels = storedParcels ? JSON.parse(storedParcels) : [];
+            } catch (e) {
+                console.error("Error loading parcels from localStorage:", e);
+                showSnackbar("Error loading saved territories");
+            }
+            
+            let parcelDetails = {};
+            let drawControl = null;
+            let markers = new L.FeatureGroup().addTo(map); // Group for all markers
 
-        let parcels = JSON.parse(localStorage.getItem('parcels')) || [];
-        let parcelDetails = {};
+            // Helper functions
+            function calculateAcreage(latlngs) {
+                const areaInMeters = L.GeometryUtil.geodesicArea(latlngs);
+                return (areaInMeters / 4046.86).toFixed(2);
+            }
 
-        function calculateAcreage(latlngs) {
-            const areaInMeters = L.GeometryUtil.geodesicArea(latlngs);
-            const areaInAcres = areaInMeters / 4046.86;
-            return areaInAcres.toFixed(2);
-        }
+            function getStatusClass(status) {
+                return `status-${status}`;
+            }
 
-        function loadParcels() {
-            parcels.forEach(parcel => {
-                const layer = L.polygon(parcel.latlngs, { color: parcel.color }).addTo(drawnItems);
-                const acreage = calculateAcreage(parcel.latlngs);
+            function showSnackbar(message, actionText, actionHandler) {
+                const snackbar = document.getElementById('snackbar');
+                snackbar.textContent = message;
+                
+                if (actionText && actionHandler) {
+                    const action = document.createElement('span');
+                    action.className = 'snackbar-action';
+                    action.textContent = actionText;
+                    action.addEventListener('click', () => {
+                        actionHandler();
+                        snackbar.classList.remove('show');
+                    });
+                    snackbar.appendChild(action);
+                }
+                
+                snackbar.classList.add('show');
+                
+                setTimeout(() => {
+                    snackbar.classList.remove('show');
+                }, 4000);
+            }
 
-                let popupContent = `
+            // Optimized parcel loading
+            function loadParcels() {
+                // Clear existing layers
+                drawnItems.clearLayers();
+                markers.clearLayers();
+                
+                // Batch create layers for better performance
+                parcels.forEach(parcel => {
+                    const layer = L.polygon(parcel.latlngs, { 
+                        color: parcel.color,
+                        fillOpacity: 0.2,
+                        weight: 2
+                    });
+                    
+                    const acreage = calculateAcreage(parcel.latlngs);
+                    const popupContent = createPopupContent(parcel, acreage);
+                    
+                    layer.bindPopup(popupContent);
+                    drawnItems.addLayer(layer);
+                    
+                    if (parcel.logo) {
+                        addLogoMarker(parcel);
+                    }
+                });
+            }
+            
+            function createPopupContent(parcel, acreage) {
+                return `
                     <div class="popup-content">
-                        <img src="${parcel.logo}" alt="Logo" style="max-width:50px;height:auto;">
-                        <div>
-                            <strong>Group Name:</strong> ${parcel.name}<br>
-                            <strong>Acreage:</strong> ${acreage} acres
+                        ${parcel.logo ? `<img src="${parcel.logo}" alt="Logo">` : '<div style="width:44px;"></div>'}
+                        <div class="details">
+                            <strong>${parcel.name || 'Unnamed Territory'}</strong>
+                            <div>Acreage: ${acreage} acres</div>
+                            <div class="status-badge ${getStatusClass(parcel.status)}">
+                                ${parcel.status.charAt(0).toUpperCase() + parcel.status.slice(1)}
+                            </div>
                         </div>
                     </div>
                 `;
-                layer.bindPopup(popupContent);
+            }
+            
+            function addLogoMarker(parcel) {
+                const layer = L.polygon(parcel.latlngs);
+                const center = layer.getBounds().getCenter();
+                
+                L.marker(center, {
+                    icon: L.divIcon({
+                        html: `<img src="${parcel.logo}" style="width:36px;height:36px;border-radius:4px;">`,
+                        iconSize: [36, 36],
+                        className: 'parcel-logo-marker'
+                    })
+                }).addTo(markers);
+            }
 
-                if (parcel.logo) {
-                    const center = layer.getBounds().getCenter();
-                    L.marker(center, {
-                        icon: L.divIcon({
-                            html: `<img src="${parcel.logo}" style="width:50px;height:50px;">`,
-                            iconSize: [50, 50]
-                        })
-                    }).addTo(map);
+            // Event listeners with optimized handlers
+            document.getElementById('parcel-logo').addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file && file.type.match('image.*')) {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        const preview = document.getElementById('logo-preview');
+                        preview.src = reader.result;
+                        preview.style.display = 'block';
+                        parcelDetails.logo = reader.result;
+                    };
+                    reader.readAsDataURL(file);
                 }
             });
-        }
 
-        const logoInput = document.getElementById('parcel-logo');
-        logoInput.addEventListener('change', event => {
-            const reader = new FileReader();
-            reader.onload = () => {
-                document.getElementById('logo-preview').src = reader.result;
-                document.getElementById('logo-preview').style.display = 'block';
-                parcelDetails.logo = reader.result;
-            };
-            reader.readAsDataURL(event.target.files[0]);
-        });
+            document.getElementById('start-drawing').addEventListener('click', function() {
+                // Remove any existing draw controls
+                if (drawControl) {
+                    map.removeControl(drawControl);
+                }
 
-        document.getElementById('start-drawing').addEventListener('click', () => {
-            parcelDetails = {
-                name: document.getElementById('parcel-name').value,
-                color: document.getElementById('parcel-color').value,
-                status: document.getElementById('parcel-status').value,
-                logo: parcelDetails.logo || null
-            };
+                parcelDetails = {
+                    name: document.getElementById('parcel-name').value.trim(),
+                    color: document.getElementById('parcel-color').value,
+                    status: document.getElementById('parcel-status').value,
+                    logo: parcelDetails.logo || null
+                };
 
-            const drawControl = new L.Control.Draw({
-                edit: { featureGroup: drawnItems },
-                draw: { polygon: true }
-            }).addTo(map);
+                if (!parcelDetails.name) {
+                    showSnackbar('Please enter a gang name before drawing');
+                    return;
+                }
 
-            map.on(L.Draw.Event.CREATED, event => {
-                const layer = event.layer;
-                layer.setStyle({ color: parcelDetails.color });
-                layer.data = { ...parcelDetails, latlngs: layer.getLatLngs() };
-                drawnItems.addLayer(layer);
+                drawControl = new L.Control.Draw({
+                    edit: { featureGroup: drawnItems },
+                    draw: { 
+                        polygon: {
+                            shapeOptions: {
+                                color: parcelDetails.color,
+                                fillOpacity: 0.2
+                            },
+                            showArea: true,
+                            metric: true,
+                            feet: false
+                        },
+                        polyline: false,
+                        rectangle: false,
+                        circle: false,
+                        marker: false,
+                        circlemarker: false
+                    }
+                }).addTo(map);
 
-                const acreage = calculateAcreage(layer.getLatLngs());
-                let popupContent = `
-                    <div class="popup-content">
-                        <img src="${parcelDetails.logo}" alt="Logo" style="max-width:50px;height:auto;">
-                        <div>
-                            <strong>Group Name:</strong> ${parcelDetails.name}<br>
-                            <strong>Acreage:</strong> ${acreage} acres
-                        </div>
-                    </div>
-                `;
-                layer.bindPopup(popupContent);
+                // Single event listener for drawing completion
+                map.once(L.Draw.Event.CREATED, function(event) {
+                    const layer = event.layer;
+                    layer.setStyle({ 
+                        color: parcelDetails.color,
+                        fillOpacity: 0.2,
+                        weight: 2
+                    });
+                    
+                    layer.data = { 
+                        ...parcelDetails, 
+                        latlngs: layer.getLatLngs()[0] 
+                    };
+                    
+                    const acreage = calculateAcreage(layer.getLatLngs()[0]);
+                    layer.bindPopup(createPopupContent(layer.data, acreage));
+                    
+                    drawnItems.addLayer(layer);
+                    
+                    if (parcelDetails.logo) {
+                        addLogoMarker(layer.data);
+                    }
 
-                parcels.push(layer.data);
-                saveParcels();
-            });
-        });
-
-        document.getElementById('clear-all').addEventListener('click', () => {
-            drawnItems.clearLayers();
-            parcels = [];
-            saveParcels();
-        });
-
-        function saveParcels() {
-            localStorage.setItem('parcels', JSON.stringify(parcels));
-        }
-
-        document.getElementById('export-data').addEventListener('click', () => {
-            const dataStr = JSON.stringify(parcels);
-            const blob = new Blob([dataStr], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = "parcels.json";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        });
-
-        document.getElementById('import-button').addEventListener('click', () => {
-            document.getElementById('import-data').click();
-        });
-
-        document.getElementById('import-data').addEventListener('change', event => {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = () => {
-                    parcels = JSON.parse(reader.result);
-                    drawnItems.clearLayers();
-                    loadParcels();
+                    parcels.push(layer.data);
                     saveParcels();
+                    showSnackbar('Territory saved successfully');
+                });
+            });
+
+            document.getElementById('clear-all').addEventListener('click', function() {
+                if (confirm('Are you sure you want to clear all territories? This cannot be undone.')) {
+                    drawnItems.clearLayers();
+                    markers.clearLayers();
+                    parcels = [];
+                    saveParcels();
+                    showSnackbar('All territories cleared');
+                }
+            });
+
+            // Debounced save function
+            const saveParcels = debounce(function() {
+                try {
+                    localStorage.setItem('parcels', JSON.stringify(parcels));
+                } catch (e) {
+                    console.error("Error saving parcels:", e);
+                    showSnackbar("Error saving territories");
+                }
+            }, 500);
+
+            document.getElementById('export-data').addEventListener('click', function() {
+                if (parcels.length === 0) {
+                    showSnackbar('No territories to export');
+                    return;
+                }
+                
+                try {
+                    const dataStr = JSON.stringify(parcels, null, 2);
+                    const blob = new Blob([dataStr], { type: "application/json" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = "the-station-territories.json";
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    setTimeout(() => URL.revokeObjectURL(url), 100);
+                    showSnackbar('Territories exported successfully');
+                } catch (e) {
+                    console.error("Error exporting data:", e);
+                    showSnackbar("Error exporting territories");
+                }
+            });
+
+            document.getElementById('import-button').addEventListener('click', function() {
+                document.getElementById('import-data').click();
+            });
+
+            document.getElementById('import-data').addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function() {
+                    try {
+                        const importedParcels = JSON.parse(reader.result);
+                        if (Array.isArray(importedParcels) && importedParcels.length > 0) {
+                            if (confirm(`Import ${importedParcels.length} territories? This will replace your current territories.`)) {
+                                parcels = importedParcels;
+                                loadParcels();
+                                saveParcels();
+                                showSnackbar('Territories imported successfully');
+                            }
+                        } else {
+                            showSnackbar('The file does not contain any valid territory data');
+                        }
+                    } catch (e) {
+                        console.error("Error parsing import file:", e);
+                        showSnackbar('Error parsing the file. Please make sure it is a valid JSON file.');
+                    }
                 };
                 reader.readAsText(file);
-            }
-        });
+            });
 
-        loadParcels();
+            // Add optimized scale control to the map
+            L.control.scale({ 
+                imperial: true, 
+                metric: true,
+                position: 'bottomleft'
+            }).addTo(map);
+
+            // Menu toggle for mobile
+            const menuToggle = document.getElementById('menu-toggle');
+            const menu = document.getElementById('menu');
+            
+            menuToggle.addEventListener('click', function() {
+                menu.classList.toggle('visible');
+                menuToggle.textContent = menu.classList.contains('visible') ? '✕' : '≡';
+            });
+
+            // Load any saved parcels on startup
+            loadParcels();
+        });
     </script>
 </body>
 </html>
